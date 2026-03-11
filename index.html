@@ -200,8 +200,6 @@ if(c>=5 && b>=5) return 1
 // trước 0 có 1 số <5
 if( c<5) return 1
 
-// sau 0 mà >7
-if(c=0 && d>=7) return 1
 
 // còn lại
 return 0
@@ -269,8 +267,16 @@ case 7:
 // 3 số liên tiếp đều >7
 if(a >= 7 && b >= 7&& c >= 7) return 1
 
+
+// sau 0 mà >7
+if(c == 0) return 1
+
+
+
 // trước 7 có 2 số <5
 if(c <= 5 && b <= 5) return 0
+
+
 
 // ngoài các trường hợp trên
 return "BỎ QUA"
