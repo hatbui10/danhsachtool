@@ -217,8 +217,7 @@ if(b<5 && c<5) return 0
 // trước 0 có 2 số >5
 if(b>=5 && c>=5) return 1
 
-// trước 0 có 1 số <5
-if( c<5) return 1 
+
          
 if( c==7)
  {
@@ -226,6 +225,8 @@ flash(C)
 return 0
 }
 
+// trước 0 có 1 số <5
+if( c<5) return 1 
 
 
 // còn lại
@@ -285,8 +286,6 @@ return 0
 ////////////////////////////////////////////////////////////////
 case 4:
 
-// trước số 4 có 2 số <5
-if(b < 5 && c < 5) return 1
 
 
 if(b==6 && c==0) {
@@ -301,6 +300,9 @@ flash(C)
 return 0
 }
 
+// trước số 4 có 2 số <5
+if(b < 5 && c < 5) return 1
+
                   
 
 // còn lại
@@ -310,7 +312,7 @@ return 0
 case 5: 
   if( c == 4 ) {
 flash(C)
-return 1
+
 }
 
   return 1
@@ -318,6 +320,15 @@ return 1
 ////////////////////////////////////////////////////////////////
 
 case 6:
+
+
+  if(a==8 && b==8 && c == 0) 
+  {
+flash(A)
+flash(B)
+flash(C)
+return 1
+}
 
 // 2 số >5
 if( c >= 5) return 1
@@ -328,13 +339,6 @@ if(b < 5 && c < 5) return 1
 // 1 lớn 1 nhỏ
 if((b >= 5 && c <= 5) || (b <= 5 && c >= 5)) return 0
 
-  if(a==8 && b==8 && c == 0) 
-  {
-flash(A)
-flash(B)
-flash(C)
-return 1
-}
 
 // còn lại
 return "BỎ QUA"
