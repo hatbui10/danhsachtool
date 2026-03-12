@@ -402,14 +402,15 @@ return 0
 // 2 số <5
 if(b < 5 && c < 5) return 1
 
-// 1 số <5 và 1 số >5
-if((b <= 5 && c >= 5) || (b >= 5 && c <= 5)) return 1
- if( b==5 && c == 0)
-  {
+if(b==5 && c==0){
 flash(B)
 flash(C)
 return 0
 }
+
+// 1 số <5 và 1 số >5
+if((b <= 5 && c >= 5) || (b >= 5 && c <= 5)) return 1
+
 
 if( c == 9) 
  {
@@ -439,7 +440,6 @@ box.classList.remove("flash")
 
 </body>
 </html>
-
 
 
 
