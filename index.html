@@ -26,7 +26,7 @@
     height: 45px;
     border-radius: 8px;
     border: 2px solid #38bdf8;
-    background: red;
+    background: #ef4444; /* Đỏ */
     color: white;
     text-align: center;
     font-size: 30px;
@@ -40,6 +40,7 @@
     border-radius: 12px;
     margin-bottom: 15px;
     border: 1px solid #334155;
+    position: relative;
   }
 
   #input50 {
@@ -54,6 +55,19 @@
     font-weight: bold;
     outline: none;
   }
+
+  /* Nút Xóa/Hoàn tác */
+  .btn-undo {
+    margin-top: 10px;
+    padding: 8px 15px;
+    background: #475569;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .btn-undo:active { background: #64748b; }
 
   #cell49 {
     display: inline-block;
@@ -73,7 +87,7 @@
     grid-template-columns: repeat(8, 1fr);
     gap: 4px;
     margin-top: 10px;
-    direction: rtl; /* Phải sang Trái */
+    direction: rtl; 
   }
   .cell {
     height: 38px;
@@ -111,6 +125,8 @@
   <div style="font-size: 12px; color: #94a3b8;">NHẬP Ô 50</div>
   <input id="input50" type="tel" maxlength="1" autocomplete="off">
   <br>
+  <button class="btn-undo" onclick="undo()">↩ Xóa nhập nhầm</button>
+  <br>
   <div style="font-size: 12px; color: #94a3b8; margin-top: 10px;">Ô 49</div>
   <div id="cell49">-</div>
 </div>
@@ -127,6 +143,7 @@ let data48 = Array(48).fill("");
 let val49 = "";
 let topInputs = [];
 
+// Khởi tạo 5 ô kết quả trên cùng
 for(let i=0; i<5; i++) {
   let inp = document.createElement("input");
   inp.readOnly = true;
@@ -134,6 +151,7 @@ for(let i=0; i<5; i++) {
   topInputs.push(inp);
 }
 
+// Khởi tạo lưới 48 ô
 for(let i=0; i<48; i++) {
   let d = document.createElement("div");
   d.className = "cell";
@@ -141,35 +159,24 @@ for(let i=0; i<48; i++) {
   mainGrid.appendChild(d);
 }
 
-input50.addEventListener("input", function() {
-  const val = this.value.trim();
-  if (val === "") return;
+function updateUI() {
+  // Cập nhật ô 49
+  cell49.innerText = val49 || "-";
 
-  // Dịch chuyển dữ liệu (Phải -> Trái)
-  for (let i = 47; i > 0; i--) {
-    data48[i] = data48[i-1];
-  }
-  data48[0] = val49;
-  val49 = val;
-  cell49.innerText = val49;
-
-  // Reset giao diện
+  // Cập nhật 48 ô dưới
   for (let i = 0; i < 48; i++) {
     const el = document.getElementById("idx" + i);
     el.innerText = data48[i];
     el.classList.remove("blink-gradient", "match-origin");
   }
+
+  // Reset top display
   topInputs.forEach(input => input.value = "");
 
-  // --- LOGIC TÌM KIẾM MỚI ---
+  // Chạy logic tìm kiếm
   let foundIndex = -1;
-
-  // Duyệt tìm ô trùng gần nhất (Duyệt từ 0 vì 0 là mới nhất)
   for (let i = 0; i < 48; i++) {
     if (data48[i] === val49 && val49 !== "") {
-      
-      // KIỂM TRA ĐIỀU KIỆN ĐỦ: Phía bên phải (Index nhỏ hơn i) phải có đủ 5 ô có dữ liệu
-      // Vì logic soi bên phải là lấy i-1, i-2, i-3, i-4, i-5
       let hasEnoughData = true;
       for (let k = 1; k <= 5; k++) {
         let checkIdx = i - k;
@@ -178,29 +185,63 @@ input50.addEventListener("input", function() {
           break;
         }
       }
-
       if (hasEnoughData) {
         foundIndex = i;
-        break; // Tìm thấy ô gần nhất thỏa mãn cả 2 điều kiện thì dừng
+        break; 
       }
     }
   }
 
-  // Nếu tìm thấy ô thỏa mãn
   if (foundIndex !== -1) {
     document.getElementById("idx" + foundIndex).classList.add("match-origin");
-
     for (let j = 1; j <= 5; j++) {
       let rightIdx = foundIndex - j;
       topInputs[j-1].value = data48[rightIdx];
       document.getElementById("idx" + rightIdx).classList.add("blink-gradient");
     }
   }
+}
 
+// Hàm Hoàn tác (Sửa lỗi khi nhập nhầm)
+function undo() {
+  if (val49 === "") return; // Chưa có gì để xóa
+
+  // Trả giá trị ô 49 về giá trị mới nhất của hàng 48
+  val49 = data48[0];
+
+  // Đẩy hàng 48 ngược lại
+  for (let i = 0; i < 47; i++) {
+    data48[i] = data48[i+1];
+  }
+  data48[47] = ""; // Ô cuối cùng trống
+
+  updateUI();
+  input50.focus();
+}
+
+input50.addEventListener("input", function() {
+  const val = this.value.trim();
+  if (val === "") return;
+
+  // Dịch chuyển dữ liệu cũ sang phải
+  for (let i = 47; i > 0; i--) {
+    data48[i] = data48[i-1];
+  }
+  
+  // Giá trị cũ của ô 49 rơi xuống ô 0 của hàng 48
+  data48[0] = val49;
+  
+  // Giá trị mới nhập vào ô 49
+  val49 = val;
+
+  updateUI();
   this.value = "";
 });
 
-document.body.addEventListener("click", () => input50.focus());
+// Luôn focus vào ô nhập
+document.body.addEventListener("click", (e) => {
+    if(e.target.tagName !== 'BUTTON') input50.focus();
+});
 input50.focus();
 </script>
 </body>
