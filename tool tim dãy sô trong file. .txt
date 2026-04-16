@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numeric Scanner Pro - Cell Edition</title>
+    <style>
+        :root {
+            --neon-color: #00f2ff;
+            --bg-color: #050505;
+            --container-bg: #0a0a0a;
+            --border-glow: 0 0 10px rgba(0, 242, 255, 0.5);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .main-container {
+            margin-top: 30px; /* Rule: 30px top */
+            margin-left: 3px;  /* Rule: 3px sides */
+            margin-right: 3px;
+            width: 100%;
+            max-width: 600px;
+            background: var(--container-bg);
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            box-shadow: var(--border-glow);
+        }
+
+        .slot-wrapper {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .slot {
+            height: 50px;
+            background: #111;
+            border: 2px solid #444;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--neon-color);
+            text-shadow: 0 0 5px var(--neon-color);
+        }
+
+        #input-slot {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: var(--neon-color);
+            text-align: center;
+            font-size: 1.5rem;
+            outline: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button, label {
+            flex: 1;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid var(--neon-color);
+            color: var(--neon-color);
+            text-align: center;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            transition: 0.3s;
+        }
+
+        button:hover, label:hover {
+            background: var(--neon-color);
+            color: #000;
+        }
+
+        #log-container {
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            background: #000;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .log-item {
+            padding: 8px;
+            border-bottom: 1px solid #222;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Vùng hiển thị file dạng ô */
+        #data-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            border-top: 1px solid #444;
+            padding-top: 15px;
+        }
+
+        .data-cell {
+            width: 30px;
+            height: 30px;
+            display: flex;
+border-radius: 5px;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+            border: 1px solid #222;
+            font-family: monospace;
+            font-size: 1rem;
+            color: #aaa;
+        }
+
+        .highlight {
+            background: #ffff00 !important;
+            color: #000 !important;
+            border-color: #fff !important;
+            box-shadow: 0 0 10px #ffff00;
+            font-weight: bold;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="slot-wrapper">
+        <div class="slot" id="s0"></div>
+        <div class="slot" id="s1"></div>
+        <div class="slot" id="s2"></div>
+        <div class="slot" id="s3"></div>
+        <div class="slot" id="s4"></div>
+        <div class="slot">
+            <input type="number" id="input-slot" inputmode="numeric" pattern="[0-9]*">
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <label for="file-upload">Upload +</label>
+        <input type="file" id="file-upload" multiple hidden accept=".txt">
+        <button onclick="clearData()">Xóa Hết</button>
+    </div>
+
+    <div id="log-container"></div>
+    <div id="data-display"></div>
+</div>
+
+<script>
+    const inputSlot = document.getElementById('input-slot');
+    const logContainer = document.getElementById('log-container');
+    const dataDisplay = document.getElementById('data-display');
+    const fileUpload = document.getElementById('file-upload');
+    
+    let slots = ["", "", "", "", ""];
+    let masterData = localStorage.getItem('masterData') || "";
+
+    window.onload = () => {
+        inputSlot.focus();
+        if (masterData) renderDataCells();
+    };
+
+    document.addEventListener('click', () => inputSlot.focus());
+
+    // Nhập ô 6 -> Dịch trái
+    inputSlot.addEventListener('input', (e) => {
+        const val = e.target.value.slice(-1);
+        if (val >= '0' && val <= '9') {
+            slots.shift();
+            slots.push(val);
+            
+            for (let i = 0; i < 5; i++) {
+                document.getElementById(`s${i}`).innerText = slots[i];
+            }
+            
+            checkPattern();
+        }
+        inputSlot.value = "";
+    });
+
+    // Upload cộng dồn
+    fileUpload.addEventListener('change', async (e) => {
+        let newContent = "";
+        for (let file of e.target.files) {
+            newContent += await file.text();
+        }
+        masterData += newContent.replace(/\s/g, ""); // Loại bỏ khoảng trắng để xử lý chuỗi thuần số
+        localStorage.setItem('masterData', masterData);
+        renderDataCells();
+    });
+
+    // Vẽ mỗi số vào 1 ô
+    function renderDataCells() {
+        dataDisplay.innerHTML = "";
+        const chars = masterData.split("");
+        chars.forEach((char, index) => {
+            const span = document.createElement('span');
+            span.className = 'data-cell';
+            span.id = `cell-${index}`;
+            span.innerText = char;
+            dataDisplay.appendChild(span);
+        });
+    }
+
+    // Tìm kiếm
+    function checkPattern() {
+        const searchStr = slots.join("");
+        if (searchStr.length < 5) return;
+
+        // Tìm tất cả vị trí xuất hiện
+        let index = masterData.indexOf(searchStr);
+        if (index !== -1) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-item';
+            logEntry.innerHTML = `<span style="color:var(--neon-color)">[${timestamp}]</span> Khớp dãy: <b style="color:#fff">${searchStr}</b>`;
+            
+            // Khi bấm log -> Cuộn tới ô đầu tiên của dãy đó
+            logEntry.onclick = () => scrollToPattern(index, searchStr.length);
+            logContainer.prepend(logEntry);
+        }
+    }
+
+    function scrollToPattern(startIndex, length) {
+        // Xóa highlight cũ
+        document.querySelectorAll('.data-cell').forEach(el => el.classList.remove('highlight'));
+
+        // Highlight các ô mới
+        for (let i = 0; i < length; i++) {
+            const cell = document.getElementById(`cell-${startIndex + i}`);
+            if (cell) cell.classList.add('highlight');
+        }
+
+        // Cuộn tới
+        const firstCell = document.getElementById(`cell-${startIndex}`);
+        if (firstCell) {
+            firstCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function clearData() {
+        if (confirm("Xóa toàn bộ dữ liệu?")) {
+            masterData = "";
+            localStorage.removeItem('masterData');
+            dataDisplay.innerHTML = "";
+            logContainer.innerHTML = "";
+            slots = ["", "", "", "", ""];
+            for (let i = 0; i < 5; i++) document.getElementById(`s${i}`).innerText = "";
+        }
+    }
+</script>
+
+</body>
+</html>
