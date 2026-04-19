@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân tích số liệu - Giao diện tối giản</title>
+    <style>
+        :root {
+            --body-bg: #121212;
+            --text-color: #e0e0e0;
+            --input-bg: #1e1e1e;
+            --border-color: #333;
+            --cell-size: 30px;
+            --cell-gap: 5px;
+            --bg-high: #ffd700; 
+            --bg-low: #4caf50;  
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px 0; /* Padding dọc cho trang */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        h2 { font-size: 1.2rem; text-align: center; margin-bottom: 20px; color: #666; }
+
+        /* THANH STT - TÀNG HÌNH */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--body-bg); /* Nền trùng màu máy để che số khi cuộn */
+            padding: 10px 3px; /* Cách mép đúng 3px */
+            overflow-x: hidden;
+            display: block;
+        }
+
+        /* VÙNG KẾT QUẢ - TÀNG HÌNH */
+        #result-container { 
+            width: 100%;
+            overflow-x: auto; 
+            padding: 10px 3px; /* Cách mép đúng 3px */
+            -webkit-overflow-scrolling: touch;
+            box-sizing: border-box;
+        }
+
+        /* GRID ĐỒNG BỘ */
+        .sync-grid {
+            display: grid;
+            gap: var(--cell-gap);
+            justify-content: start;
+            width: max-content;
+        }
+
+        /* Ô SỐ THỨ TỰ (0-9) */
+        .index-box {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Màu Gradient STT */
+        .idx-0 { background: linear-gradient(135deg, #ff4b1f, #ff9068); }
+        .idx-1 { background: linear-gradient(135deg, #1fddff, #1291ff); }
+        .idx-2 { background: linear-gradient(135deg, #ff00cc, #333399); }
+        .idx-3 { background: linear-gradient(135deg, #00f260, #0575e6); }
+        .idx-4 { background: linear-gradient(135deg, #f12711, #f5af19); }
+        .idx-5 { background: linear-gradient(135deg, #8e2de2, #4a00e0); }
+        .idx-6 { background: linear-gradient(135deg, #f953c6, #b91d73); }
+        .idx-7 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .idx-8 { background: linear-gradient(135deg, #eb3349, #f45c43); }
+        .idx-9 { background: linear-gradient(135deg, #4568dc, #b06ab3); }
+
+        /* Ô SỐ KẾT QUẢ */
+        .number-box {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            border-radius: 4px;
+            font-size: 18px;
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        .high { background-color: var(--bg-high) !important; color: #000 !important; box-shadow: 0 0 8px var(--bg-high); }
+        .low { background-color: var(--bg-low) !important; color: #fff !important; box-shadow: 0 0 8px var(--bg-low); }
+
+        /* BỘ ĐIỀU KHIỂN */
+        .controls {
+            margin: 20px 10px;
+            padding: 15px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 13px; color: #888; }
+        input { padding: 12px; border: 1px solid #333; border-radius: 6px; background: #2d2d2d; color: white; font-size: 16px; }
+
+        .btn-group { display: flex; gap: 10px; }
+        .main-btn { flex: 1; border: none; padding: 12px; border-radius: 6px; font-weight: bold; color: white; cursor: pointer; }
+        .btn-high { background: #b8860b; }
+        .btn-low { background: #2e7d32; }
+
+        @media (min-width: 600px) { .controls { flex-direction: row; align-items: flex-end; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="sticky-header" id="headerWrapper">
+        <div id="header-grid" class="sync-grid"></div>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>File dữ liệu</label>
+            <input type="file" id="fileInput" accept=".txt">
+        </div>
+        <div class="control-group">
+            <label>Độ dài (x)</label>
+            <input type="number" id="rowLength" value="10" min="1">
+        </div>
+        <div class="btn-group">
+            <button class="main-btn btn-high" onclick="processData('high')">TÔ VÀNG</button>
+            <button class="main-btn btn-low" onclick="processData('low')">TÔ XANH</button>
+        </div>
+    </div>
+
+    <div id="result-container">
+        <div id="result-grid" class="sync-grid"></div>
+    </div>
+</div>
+
+<script>
+    const rowLengthInput = document.getElementById('rowLength');
+    const headerGrid = document.getElementById('header-grid');
+    const resultContainer = document.getElementById('result-container');
+    const headerWrapper = document.getElementById('headerWrapper');
+
+    // Đồng bộ cuộn ngang
+    resultContainer.onscroll = function() {
+        headerWrapper.scrollLeft = resultContainer.scrollLeft;
+    };
+
+    window.onload = function() {
+        const savedLength = localStorage.getItem('userRowLength');
+        if (savedLength) rowLengthInput.value = savedLength;
+        updateHeaderGrid();
+    };
+
+    rowLengthInput.addEventListener('input', function() {
+        localStorage.setItem('userRowLength', rowLengthInput.value);
+        updateHeaderGrid();
+    });
+
+    function updateHeaderGrid() {
+        const x = parseInt(rowLengthInput.value) || 10;
+        headerGrid.style.gridTemplateColumns = `repeat(${x}, var(--cell-size))`;
+        headerGrid.innerHTML = '';
+        for (let i = 0; i < x; i++) {
+            const stt = i % 10;
+            const box = document.createElement('div');
+            box.className = `index-box idx-${stt}`;
+            box.textContent = stt;
+            headerGrid.appendChild(box);
+        }
+    }
+
+    function processData(mode) {
+        const fileInput = document.getElementById('fileInput');
+        const x = parseInt(rowLengthInput.value);
+        if (!fileInput.files[0]) { alert("Vui lòng tải file!"); return; }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const rawText = e.target.result;
+            // Xử lý dữ liệu bỏ qua [source] và dấu \
+            const cleanText = rawText.replace(/\\/g, ' ').replace(/\\/gi, ' ');
+            const numbers = cleanText.trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
+            renderGrid(numbers, x, mode);
+        };
+        reader.readAsText(fileInput.files[0]);
+    }
+
+    function renderGrid(data, columns, mode) {
+        const grid = document.getElementById('result-grid');
+        grid.innerHTML = ''; 
+        grid.style.gridTemplateColumns = `repeat(${columns}, var(--cell-size))`;
+        data.forEach(num => {
+            const box = document.createElement('div');
+            box.className = 'number-box';
+            box.textContent = num;
+            if (mode === 'high' && num >= 5) box.classList.add('high');
+            else if (mode === 'low' && num < 5) box.classList.add('low');
+            grid.appendChild(box);
+        });
+    }
+</script>
+
+</body>
+</html>
