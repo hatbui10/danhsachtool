@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bảo mật cơ bản</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00ff;
+            --bg-color: #050505;
+            --text-bright: #ffffff;
+            --text-dim: #b0b0b0;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-bright);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 30px 3px 20px 3px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--neon-blue);
+            text-shadow: 0 0 15px var(--neon-blue);
+            text-transform: uppercase;
+            font-size: 1.3rem;
+        }
+
+        .box {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--neon-blue);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px;
+            color: #fff; /* Chữ gõ vào sẽ màu trắng sáng */
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
+
+        /* Lưới chọn ký tự & hình vẽ sáng hơn */
+        .grid-select {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .item-select {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #eee; /* Ký tự chưa chọn màu trắng xám */
+            transition: 0.3s;
+        }
+
+        .item-select svg { width: 26px; height: 26px; stroke: #ccc; stroke-width: 2.5; fill: none; }
+
+        /* Hiệu ứng khi được chọn - Sáng rực lên */
+        .item-select.active {
+            border-color: var(--neon-pink);
+            background: rgba(255, 0, 255, 0.2);
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-pink);
+            box-shadow: 0 0 15px var(--neon-pink);
+        }
+        .item-select.active svg { stroke: var(--neon-pink); filter: drop-shadow(0 0 5px var(--neon-pink)); }
+
+        .color-wrapper { display: flex; align-items: center; gap: 20px; }
+        input[type="color"] { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #fff; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        button { padding: 18px; border: none; border-radius: 12px; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 1rem; }
+        
+        .btn-enc { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
+        .btn-dec { background: transparent; border: 2px solid var(--neon-pink); color: var(--neon-pink); }
+
+        textarea { margin-top: 20px; height: 120px; color: var(--neon-blue); border: 1px solid var(--neon-blue); background: #000; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>KSS OMNI - V3 VISUAL</h2>
+
+    <div class="box">
+        <label>01. TỆP TIN NGUỒN</label>
+        <input type="file" id="f">
+    </div>
+
+    <div class="box">
+        <label>02. CÂU HỎI & TRẢ LỜI</label>
+        <select id="q" style="margin-bottom: 10px; color: var(--neon-blue);">
+            <option value="0">--- Chọn câu hỏi gợi ý ---</option>
+            <option value="1">Mật mã thời thơ ấu của bạn là gì?</option>
+            <option value="2">Tên người bạn âm thầm ngưỡng mộ?</option>
+            <option value="3">Địa danh bạn muốn đến nhất?</option>
+            <option value="4">Sự kiện quan trọng nhất đời bạn?</option>
+            <option value="5">Món quà ý nghĩa nhất từng nhận?</option>
+            <option value="6">Con số gắn liền với định mệnh?</option>
+            <option value="7">Tên một loài hoa bạn thích?</option>
+            <option value="8">Một từ duy nhất mô tả bản thân?</option>
+            <option value="9">Ước mơ lớn nhất lúc này là gì?</option>
+            <option value="10">Ký ức buồn nhất từng trải qua?</option>
+        </select>
+        <input type="text" id="a" placeholder="Gõ câu trả lời tại đây...">
+    </div>
+
+    <div class="box">
+        <label>03. 12 CHỮ SỐ BẢO MẬT</label>
+        <input type="number" id="n" placeholder="Nhập đủ 12 con số..." oninput="if(value.length>12)value=value.slice(0,12)">
+    </div>
+
+    <div class="box">
+        <label>04. KÝ TỰ ĐẶC BIỆT (CHỌN TÙY Ý)</label>
+        <div class="grid-select" id="specGrid"></div>
+    </div>
+
+    <div class="box">
+        <label>05. HÌNH VẼ ĐỊNH DANH (CHỌN TÙY Ý)</label>
+        <div class="grid-select" id="shapeGrid"></div>
+    </div>
+
+    <div class="box">
+        <label>06. MÃ MÀU BẢO MẬT</label>
+        <div class="color-wrapper">
+            <input type="color" id="c" value="#00f3ff">
+            <span id="hexVal" style="font-family: monospace; font-size: 1.2rem; font-weight: bold; color: var(--neon-blue);">#00f3ff</span>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-enc" onclick="run('enc')">MÃ HOÁ & TẢI FILE</button>
+        <button class="btn-dec" onclick="run('dec')">GIẢI MÃ & KHÔI PHỤC</button>
+    </div>
+
+    <textarea id="o" readonly placeholder="Kết quả sẽ hiển thị tại đây sáng rõ..."></textarea>
+</div>
+
+<script>
+    let selShapes = [];
+    let selSpecs = [];
+
+    const specs = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', ';', ':', '?', '/', '>', '<', '~', '|'];
+    const icons = [
+        '<circle cx="12" cy="12" r="9"/>','<rect x="4" y="4" width="16" height="16"/>',
+        '<path d="M12 2 L22 20 L2 20 Z"/>','<path d="M12 2 L15 9 L22 9 L17 14 L19 21 L12 17 L5 21 L7 14 L2 9 L9 9 Z"/>',
+        '<ellipse cx="12" cy="12" rx="9" ry="5"/>','<path d="M3 12 h18 M12 3 v18"/>',
+        '<path d="M5 5 L19 19 M19 5 L5 19"/>','<circle cx="12" cy="12" r="4"/>',
+        '<path d="M12 21 a9 9 0 1 0 0 -18 v18"/>','<rect x="8" y="2" width="8" height="20" rx="2"/>'
+    ];
+
+    const sGrid = document.getElementById('specGrid');
+    specs.forEach(s => {
+        const d = document.createElement('div');
+        d.className = 'item-select';
+        d.innerText = s;
+        d.onclick = () => {
+            if(selSpecs.includes(s)) selSpecs = selSpecs.filter(x => x !== s);
+            else selSpecs.push(s);
+            d.classList.toggle('active');
+        };
+        sGrid.appendChild(d);
+    });
+
+    const gGrid = document.getElementById('shapeGrid');
+    icons.forEach((svg, i) => {
+        const d = document.createElement('div');
+        d.className = 'item-select';
+        d.innerHTML = `<svg viewBox="0 0 24 24">${svg}</svg>`;
+        d.onclick = () => {
+            if(selShapes.includes(i)) selShapes = selShapes.filter(x => x !== i);
+            else selShapes.push(i);
+            d.classList.toggle('active');
+        };
+        gGrid.appendChild(d);
+    });
+
+    document.getElementById('c').oninput = function() {
+        document.getElementById('hexVal').innerText = this.value.toUpperCase();
+        document.getElementById('hexVal').style.color = this.value;
+        this.style.borderColor = this.value;
+    };
+
+    async function run(m) {
+        const file = document.getElementById('f').files[0];
+        const ans = document.getElementById('a').value;
+        const num = document.getElementById('n').value;
+        const hex = document.getElementById('c').value;
+
+        if (!file || !ans || num.length < 12 || selSpecs.length === 0 || selShapes.length === 0) {
+            alert("⚠️ CẢNH BÁO: Vui lòng nhập đủ 12 số và chọn ít nhất 1 ký tự + 1 hình!"); return;
+        }
+
+        const raw = ans + num + selSpecs.sort().join('') + selShapes.sort().join(',') + hex;
+        const salt = CryptoJS.SHA512(hex + num + selSpecs.length).toString();
+
+        const r = new FileReader();
+        r.onload = function(e) {
+            try {
+                const k = CryptoJS.PBKDF2(raw, salt, { keySize: 512/32, iterations: 100000, hasher: CryptoJS.algo.SHA512 }).toString();
+                const content = e.target.result;
+
+                if (m === 'enc') {
+                    const encrypted = CryptoJS.AES.encrypt(content, k).toString();
+                    const blob = new Blob(["KSS_V3_BRIGHT|" + encrypted], {type: 'text/plain'});
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `KSS_SECURE_${Date.now().toString().slice(-4)}.txt`;
+                    a.click();
+                    alert("✅ THÀNH CÔNG: File đã được tải xuống. Form sẽ tự động xóa sạch để bảo mật.");
+                    location.reload(); 
+                } else {
+                    let data = content;
+                    if(content.startsWith("KSS_V3_BRIGHT|")) data = content.split("|")[1];
+                    const dec = CryptoJS.AES.decrypt(data, k);
+                    const orig = dec.toString(CryptoJS.enc.Utf8);
+                    if (!orig) throw new Error();
+                    document.getElementById('o').value = orig;
+                }
+            } catch (err) { alert("❌ LỖI: Sai thông tin bảo mật hoặc file không hợp lệ!"); }
+        };
+        r.readAsText(file);
+    }
+</script>
+</body>
+</html>
