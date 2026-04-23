@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tạo file các tài khoản</title>
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-pink: #ff00ea;
+            --bg-deep: #050505;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 30px 3px 0 3px; 
+            padding-bottom: 20px;
+        }
+
+        .container {
+            width: 100%;
+            box-sizing: border-box;
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: var(--neon-blue);
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            height: 45px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            padding: 0 12px;
+            box-sizing: border-box;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 8px var(--neon-blue);
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        button {
+            height: 50px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-create {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
+
+        .btn-export {
+            background: var(--neon-pink);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(255, 0, 234, 0.3);
+        }
+
+        .btn-clear {
+            background: #222;
+            color: #888;
+            grid-column: span 2;
+            height: 40px;
+            margin-top: 5px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px; /* Tăng chiều cao thêm một chút */
+            background: #000;
+            color: #00ff41;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+            resize: vertical; /* Cho phép kéo giãn chiều cao */
+            margin-top: 10px;
+            outline: none;
+            line-height: 1.4;
+        }
+
+        textarea:focus {
+            border-color: var(--neon-pink);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="input-group">
+            <label>Ứng dụng</label>
+            <input type="text" id="appName" placeholder="Tên App..." autocomplete="off">
+        </div>
+        <div class="input-group">
+            <label>ID / Tài khoản</label>
+            <input type="text" id="appId" placeholder="ID..." autocomplete="off">
+        </div>
+        <div class="input-group">
+            <label>Mật khẩu</label>
+            <input type="text" id="appPass" placeholder="Mật khẩu..." autocomplete="off">
+        </div>
+
+        <div class="btn-grid">
+            <button class="btn-create" onclick="createData()">Thêm vào danh sách</button>
+            <button class="btn-export" onclick="exportTxt()">Xuất file .TXT</button>
+            <button class="btn-clear" onclick="clearData()">Xóa toàn bộ</button>
+        </div>
+
+        <textarea id="resultArea" placeholder="Dữ liệu sẽ hiện ở đây. Bạn có thể sửa trực tiếp tại đây..."></textarea>
+    </div>
+
+    <script>
+        let count = 1;
+        const area = document.getElementById('resultArea');
+
+        // Khôi phục dữ liệu khi load trang
+        window.onload = () => {
+            const savedData = localStorage.getItem('mobile_app_content');
+            const savedCount = localStorage.getItem('mobile_app_count');
+            if (savedData) area.value = savedData;
+            if (savedCount) count = parseInt(savedCount);
+        };
+
+        // Lắng nghe sự kiện gõ trực tiếp vào textarea để lưu lại
+        area.addEventListener('input', () => {
+            localStorage.setItem('mobile_app_content', area.value);
+        });
+
+        function createData() {
+            const name = document.getElementById('appName').value.trim();
+            const id = document.getElementById('appId').value.trim();
+            const pass = document.getElementById('appPass').value.trim();
+
+            if (!name || !id || !pass) {
+                alert("Hãy nhập đủ thông tin!");
+                return;
+            }
+
+            const lineSeparator = "----------------------------------------\n";
+            const entry = `${count}. APP: ${name}\n   ID: ${id}\n   PASS: ${pass}\n${lineSeparator}`;
+            
+            // Thêm nội dung mới
+            area.value += entry;
+            count++;
+
+            // Lưu vào Storage
+            localStorage.setItem('mobile_app_content', area.value);
+            localStorage.setItem('mobile_app_count', count);
+
+            // Reset input
+            document.getElementById('appName').value = '';
+            document.getElementById('appId').value = '';
+            document.getElementById('appPass').value = '';
+            document.getElementById('appName').focus();
+            
+            area.scrollTop = area.scrollHeight;
+        }
+
+        function exportTxt() {
+            // Lấy nội dung hiện tại trong textarea (bao gồm cả phần đã sửa tay)
+            const content = area.value;
+            if (!content) return alert("Chưa có dữ liệu để xuất!");
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const link = document.createElement('a');
+            const suffix = Math.floor(1000 + Math.random() * 9000);
+
+            link.href = URL.createObjectURL(blob);
+            link.download = `Danh_Sach_App_${suffix}.txt`;
+            link.click();
+        }
+
+        function clearData() {
+            if (confirm("Xóa sạch toàn bộ dữ liệu hiện có?")) {
+                localStorage.clear();
+                area.value = '';
+                count = 1;
+            }
+        }
+    </script>
+</body>
+</html>
