@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sổ Tay Nấu Ăn V11 - Sửa Lỗi Font</title>
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-pink: #ff00ea;
+            --neon-green: #00ff41;
+            --bg-deep: #050505;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 20px 10px;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        h2 { text-align: center; color: var(--neon-blue); text-transform: uppercase; margin: 0 0 20px 0; font-size: 18px; }
+
+        .section-title {
+            font-size: 11px; color: var(--neon-pink); margin-bottom: 12px;
+            border-left: 3px solid var(--neon-pink); padding-left: 8px;
+            text-transform: uppercase; font-weight: bold; display: block;
+        }
+
+        .spacer-30 { margin-top: 30px; }
+
+        .x1-main-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 242, 255, 0.4);
+            border-radius: 10px; padding: 15px;
+        }
+
+        .x2i-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #333; border-radius: 8px;
+            padding: 12px; margin-bottom: 12px; position: relative;
+        }
+
+        label { display: block; font-size: 10px; color: var(--neon-blue); margin-bottom: 4px; font-weight: bold; }
+
+        input, textarea {
+            background: #000; border: 1px solid #444; border-radius: 6px;
+            color: #fff; padding: 12px; font-size: 16px; outline: none;
+            width: 100%; box-sizing: border-box;
+        }
+
+        input:focus, textarea:focus { border-color: var(--neon-blue); }
+
+        .large-textarea { height: 200px; line-height: 1.6; }
+
+        .btn-add-x2i {
+            background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green);
+            padding: 10px; border-radius: 6px; font-size: 12px; width: 100%; cursor: pointer;
+        }
+
+        .btn-remove-x2i {
+            position: absolute; top: -5px; right: -5px;
+            background: #ff4444; color: white; border: none;
+            border-radius: 50%; width: 24px; height: 24px;
+        }
+
+        .btn-grid { display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 8px; margin-top: 20px; }
+        .main-btn { height: 48px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; }
+        .btn-create { background: var(--neon-blue); color: #000; }
+        .btn-export { background: var(--neon-pink); color: #fff; }
+        .btn-reset { background: #333; color: #fff; }
+
+        #resultArea { height: 250px; color: var(--neon-green); font-family: monospace; margin-top: 20px; border: 1px solid #444; font-size: 12px; }
+        .flex-group { display: flex; gap: 8px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>👨‍🍳 KITCHEN DIARY V11</h2>
+
+        <div class="x1-main-box">
+            <span class="section-title">X1: Tên món ăn</span>
+            <input type="text" id="recipeName" placeholder="Tên món...">
+
+            <div style="margin-top: 20px;">
+                <span class="section-title">Thành phần (X2i)</span>
+                <div id="x2i-list"></div>
+                <button class="btn-add-x2i" onclick="addX2i()">+ THÊM NGUYÊN LIỆU</button>
+            </div>
+        </div>
+
+        <div class="spacer-30">
+            <span class="section-title">X2: Cách chế biến</span>
+            <textarea id="cookingSteps" class="large-textarea" placeholder="Nhảy số tự động..."></textarea>
+        </div>
+
+        <div class="spacer-30">
+            <span class="section-title">X3: Lưu ý</span>
+            <textarea id="notes" class="large-textarea" placeholder="Nhảy số tự động..."></textarea>
+        </div>
+
+        <div class="btn-grid">
+            <button class="main-btn btn-create" onclick="saveRecipe()">Lưu Sổ</button>
+            <button class="main-btn btn-export" onclick="exportTxt()">Xuất TXT (Sửa Font)</button>
+            <button class="main-btn btn-reset" onclick="resetForm()">Reset</button>
+        </div>
+
+        <textarea id="resultArea" placeholder="Dữ liệu tổng hợp..."></textarea>
+    </div>
+
+    <datalist id="list-ing">
+        <option value="Thịt bò"> <option value="Thịt heo"> <option value="Tôm"> <option value="Hành lá"> <option value="Tỏi băm"> <option value="Nước mắm"> <option value="Đường">
+    </datalist>
+
+    <datalist id="list-unit">
+        <option value="g"> <option value="kg"> <option value="ml"> <option value="muỗng cafe"> <option value="muỗng canh"> <option value="quả"> <option value="củ">
+    </datalist>
+
+    <datalist id="list-numbers">
+        <option value="1"> <option value="2"> <option value="5"> <option value="10"> <option value="20"> <option value="50"> <option value="100"> <option value="200"> <option value="300"> <option value="500">
+    </datalist>
+
+    <script>
+        const x2iList = document.getElementById('x2i-list');
+        const area = document.getElementById('resultArea');
+        const stepsArea = document.getElementById('cookingSteps');
+        const notesArea = document.getElementById('notes');
+
+        window.onload = () => {
+            const saved = localStorage.getItem('cook_pro_v11');
+            if (saved) area.value = saved;
+            addX2i();
+            stepsArea.value = "1. ";
+            notesArea.value = "1. ";
+        };
+
+        function addX2i() {
+            const div = document.createElement('div');
+            div.className = 'x2i-box';
+            div.innerHTML = `
+                <button class="btn-remove-x2i" onclick="this.parentElement.remove()">✕</button>
+                <div style="margin-bottom: 8px;">
+                    <label>Tên thành phần</label>
+                    <input type="text" class="in-ing" list="list-ing" placeholder="Tên...">
+                </div>
+                <div class="flex-group">
+                    <div style="flex:1">
+                        <label>Định lượng</label>
+                        <input type="text" class="in-amt" list="list-numbers" inputmode="decimal" placeholder="Số...">
+                    </div>
+                    <div style="flex:1">
+                        <label>Đơn vị</label>
+                        <input type="text" class="in-unit" list="list-unit" placeholder="g, ml...">
+                    </div>
+                </div>
+            `;
+            x2iList.appendChild(div);
+        }
+
+        function setupAutoNumber(el) {
+            el.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const lines = el.value.split('\n');
+                    const lastLine = lines[lines.length - 1];
+                    const match = lastLine.match(/^(\d+)\./);
+                    let nextNum = match ? parseInt(match[1]) + 1 : 1;
+                    el.value += "\n" + nextNum + ". ";
+                    el.scrollTop = el.scrollHeight;
+                }
+            });
+        }
+
+        setupAutoNumber(stepsArea);
+        setupAutoNumber(notesArea);
+
+        function saveRecipe() {
+            const name = document.getElementById('recipeName').value.trim();
+            if (!name) return alert("Nhập tên món!");
+            let content = `🥘 MÓN: ${name.toUpperCase()}\n📍 THÀNH PHẦN:\n`;
+            document.querySelectorAll('.x2i-box').forEach((item, index) => {
+                const ing = item.querySelector('.in-ing').value;
+                const amt = item.querySelector('.in-amt').value;
+                const unit = item.querySelector('.in-unit').value;
+                if(ing) content += `   ${index + 1}. ${ing}: ${amt}${unit}\n`;
+            });
+            content += `📝 CHẾ BIẾN:\n   ${stepsArea.value.replace(/\n/g, '\n   ')}\n`;
+            content += `💡 LƯU Ý:\n   ${notesArea.value.replace(/\n/g, '\n   ')}\n`;
+            content += `----------------------------------------\n\n`;
+            area.value += content;
+            localStorage.setItem('cook_pro_v11', area.value);
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('recipeName').value = '';
+            x2iList.innerHTML = '';
+            addX2i();
+            stepsArea.value = "1. ";
+            notesArea.value = "1. ";
+        }
+
+        // HÀM XUẤT FILE ĐÃ SỬA LỖI FONT
+        function exportTxt() {
+            if (!area.value) return alert("Chưa có nội dung để xuất!");
+            
+            // Bước 1: Thêm BOM (Byte Order Mark) để ép Windows/Notepad nhận diện UTF-8
+            const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+            const content = area.value;
+            
+            // Bước 2: Tạo Blob kết hợp BOM và nội dung
+            const blob = new Blob([bom, content], { type: 'text/plain;charset=utf-8' });
+            
+            // Bước 3: Tải file
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `CookBook_${new Date().toLocaleDateString('vi-VN')}.txt`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+    </script>
+</body>
+</html>
